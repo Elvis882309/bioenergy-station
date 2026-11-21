@@ -1,0 +1,188 @@
+/* Dashboard child page shell (DESIGN.md › 原仪表盘). Scope: html[data-ui-shell=dashboard].
+   Embedded variant: html[data-ui-embed=workbench], set only when the workbench marks its iframe.
+   Untouched on purpose: #plantViewport and everything inside it (3D scene, labels, view tools),
+   canvas#vessel and .vessel-wrap, Plotly plots, the digit strip DOM created by dashboard.js. */
+[data-ui-shell=dashboard] body {
+  --bg: var(--bio-bg); --panel: var(--bio-surface); --panel-2: var(--bio-raised); --border: var(--bio-divider);
+  --text: var(--bio-text); --muted: var(--bio-muted); --accent: var(--bio-primary);
+  background: var(--bio-bg); color: var(--bio-text); font: 400 15px/1.6 var(--bio-font);
+}
+/* 3D viewport labels keep the pre-shell inherited font (size/position unchanged). */
+[data-ui-shell=dashboard] #plantViewport { font: 14px/normal var(--sans); }
+[data-ui-shell=dashboard] :where(button, input, select, a, summary):focus-visible { outline: 2px solid var(--bio-primary); outline-offset: 2px; }
+
+/* ---- Top bar ---- */
+[data-ui-shell=dashboard] .topbar { min-height: 56px; padding: 8px clamp(16px, 1.6vw, 24px); background: var(--bio-surface); border-bottom: 1px solid var(--bio-divider); }
+[data-ui-shell=dashboard] .titles h1 { font: 600 18px/1.3 var(--bio-font); letter-spacing: 0; }
+[data-ui-shell=dashboard] .titles p { font: 400 13px/1.5 var(--bio-font); color: var(--bio-muted); margin-top: 0; }
+[data-ui-shell=dashboard] .badges { gap: 4px var(--bio-s-sm); align-items: center; }
+[data-ui-shell=dashboard] .badges label { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font: 500 14px/1.45 var(--bio-font); color: var(--bio-text); cursor: pointer; }
+[data-ui-shell=dashboard] .badges input[type=checkbox] { width: 16px; height: 16px; margin: 0; accent-color: var(--bio-primary); }
+[data-ui-shell=dashboard] .badges .badge { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); border-left-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .uiScope { display: none; }
+
+/* Embedded: parent keeps product navigation; this bar compresses and stops being sticky. */
+[data-ui-embed=workbench] .topbar { position: static; min-height: 48px; padding-block: 4px; }
+[data-ui-embed=workbench] .logo { display: none; }
+[data-ui-embed=workbench] .titles { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 var(--bio-s-sm); }
+[data-ui-embed=workbench] .titles p { order: -1; margin: 0; font: 600 16px/1.4 var(--bio-font); color: var(--bio-text); }
+[data-ui-embed=workbench] .titles h1 { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); }
+[data-ui-embed=workbench] .uiScope { display: inline-block; padding-right: var(--bio-s-sm); border-right: 1px solid var(--bio-divider); color: var(--bio-muted); font-size: 13px; }
+
+/* ---- Layout ---- */
+[data-ui-shell=dashboard] .layout { grid-template-columns: 344px minmax(0, 1fr); gap: clamp(16px, 1.4vw, 24px); padding: clamp(16px, 1.4vw, 24px); max-width: 1600px; }
+[data-ui-shell=dashboard] .main { gap: var(--bio-s-md); }
+[data-ui-shell=dashboard] .card { border-radius: var(--bio-r-panel); border-color: var(--bio-divider); }
+
+/* ---- Sidebar form hierarchy ---- */
+[data-ui-shell=dashboard] .sidebar {
+  top: 72px; max-height: calc(100dvh - 88px); overflow: auto; overscroll-behavior: contain;
+  background: var(--bio-surface); border: 1px solid var(--bio-divider); border-radius: var(--bio-r-panel);
+}
+[data-ui-embed=workbench] .sidebar { top: 16px; max-height: calc(100dvh - 32px); }
+[data-ui-shell=dashboard] .sidebar .card { padding: var(--bio-s-md) var(--bio-s-panel); border-bottom-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .sidebar h2 { margin: 0 0 var(--bio-s-control); font: 600 16px/1.4 var(--bio-font); color: var(--bio-text); text-transform: none; letter-spacing: 0; }
+[data-ui-shell=dashboard] .field { margin-bottom: var(--bio-s-control); }
+[data-ui-shell=dashboard] .field label { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; font: 500 14px/1.45 var(--bio-font); color: var(--bio-text); }
+[data-ui-shell=dashboard] .field .unit, [data-ui-shell=dashboard] .feed-total span { color: var(--bio-muted); font: 400 13px/1.5 var(--bio-font); }
+[data-ui-shell=dashboard] .field output { margin-left: auto; font: 500 14px/1.45 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-primary); }
+[data-ui-shell=dashboard] .field output + .unit { margin-left: 0; }
+[data-ui-shell=dashboard] .sidebar :is(input[type=number], select) {
+  height: var(--bio-control-h); padding: 0 10px; border-radius: var(--bio-r-control); border: 1px solid var(--bio-border);
+  background: var(--bio-bg); color: var(--bio-text); font: 400 14px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums;
+}
+[data-ui-shell=dashboard] .sidebar input[type=number]:focus, [data-ui-shell=dashboard] .sidebar select:focus { border-color: var(--bio-primary); }
+[data-ui-shell=dashboard] .sidebar :is(input, select):disabled { color: var(--bio-disabled); border-style: dashed; cursor: not-allowed; }
+[data-ui-shell=dashboard] .sidebar input[type=range] { height: 28px; background: transparent; cursor: pointer; }
+[data-ui-shell=dashboard] .sidebar input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--bio-divider); }
+[data-ui-shell=dashboard] .sidebar input[type=range]::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -7px; border: 2px solid var(--bio-bg); background: var(--bio-primary); box-shadow: none; }
+[data-ui-shell=dashboard] .sidebar input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--bio-divider); }
+[data-ui-shell=dashboard] .sidebar input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border: 2px solid var(--bio-bg); background: var(--bio-primary); }
+[data-ui-shell=dashboard] .sidebar input[type=range]:disabled { cursor: not-allowed; opacity: 1; }
+[data-ui-shell=dashboard] .sidebar input[type=range]:disabled::-webkit-slider-thumb { background: var(--bio-disabled); }
+
+[data-ui-shell=dashboard] .feed-columns, [data-ui-shell=dashboard] .feed-row { grid-template-columns: minmax(0, 1fr) 80px 40px; gap: var(--bio-s-sm); }
+[data-ui-shell=dashboard] .feed-columns { font: 500 13px/1.45 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .feed-row select { font-family: var(--bio-font); font-size: 14px; }
+[data-ui-shell=dashboard] .feed-row input { text-align: right; }
+[data-ui-shell=dashboard] .feed-row .remove { width: 40px; height: var(--bio-control-h); border-radius: var(--bio-r-control); border-color: var(--bio-divider); color: var(--bio-muted); font-size: 16px; }
+[data-ui-shell=dashboard] .feed-row .remove:hover:not(:disabled) { color: var(--bio-danger); border-color: var(--bio-danger); }
+[data-ui-shell=dashboard] .feed-row .remove:disabled { color: var(--bio-disabled); border-style: dashed; cursor: not-allowed; }
+[data-ui-shell=dashboard] .feed-total { display: flex; align-items: baseline; gap: 6px; border-top-color: var(--bio-divider); font: 500 14px/1.45 var(--bio-font); color: var(--bio-text); }
+[data-ui-shell=dashboard] .feed-total strong { font: 600 16px/1.4 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+
+[data-ui-shell=dashboard] .uiAdvanced { margin-top: var(--bio-s-sm); border-top: 1px solid var(--bio-divider); }
+[data-ui-shell=dashboard] .uiAdvanced summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--bio-s-sm); min-height: 40px; padding: 8px 0; font: 500 14px/1.45 var(--bio-font); color: var(--bio-primary); cursor: pointer; }
+[data-ui-shell=dashboard] .uiAdvanced .uiSummary { flex-basis: 100%; font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .uiAdvanced .uiSummary[data-changed=true] { color: var(--bio-increment); }
+[data-ui-shell=dashboard] .uiAdvanced[open] summary { margin-bottom: var(--bio-s-sm); }
+
+/* Submit area: after the inputs, sticks to the bottom of the scrolling sidebar without covering content. */
+[data-ui-shell=dashboard] .uiSubmit { position: sticky; bottom: 0; z-index: 1; padding: var(--bio-s-control) var(--bio-s-panel) var(--bio-s-md); background: var(--bio-surface); border-top: 1px solid var(--bio-divider); }
+[data-ui-shell=dashboard] .sidebar .uiSubmit :is(.actions, .status) { margin: 0; }
+[data-ui-shell=dashboard] .uiSubmit .actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--bio-s-sm); }
+[data-ui-shell=dashboard] .uiSubmit #run { grid-column: 1 / -1; }
+[data-ui-shell=dashboard] .uiSubmit .status { margin-top: var(--bio-s-sm); padding: 6px 10px; min-height: 0; border-radius: var(--bio-r-control); border-color: var(--bio-divider); background: var(--bio-bg); font: 400 13px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .status.busy { color: var(--bio-warning); border-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .status.ok { color: var(--bio-success); border-color: color-mix(in srgb, var(--bio-success) 45%, var(--bio-surface)); }
+[data-ui-shell=dashboard] .status.error { color: var(--bio-danger); border-color: var(--bio-danger); background: var(--bio-bg); }
+/* ---- Buttons outside the 3D viewport ---- */
+[data-ui-shell=dashboard] :is(.topbar, .sidebar, .instrument-bar, .plant-foot, .instrument > .bar, .stage-panel, .footer, .compare) .btn {
+  min-height: var(--bio-control-h); padding: 0 var(--bio-s-control); border-radius: var(--bio-r-control);
+  border: 1px solid var(--bio-divider); background: var(--bio-raised); color: var(--bio-text);
+  font: 500 14px/1.45 var(--bio-font); transition: none;
+}
+[data-ui-shell=dashboard] :is(.topbar, .sidebar, .instrument-bar, .plant-foot, .instrument > .bar, .stage-panel, .footer, .compare) .btn:hover:not(:disabled) {
+  border-color: var(--bio-border); background: color-mix(in srgb, var(--bio-raised) 82%, var(--bio-primary));
+}
+[data-ui-shell=dashboard] :is(.topbar, .sidebar, .instrument-bar, .plant-foot, .instrument > .bar, .stage-panel, .footer, .compare) .btn.ghost { background: transparent; color: var(--bio-text); }
+[data-ui-shell=dashboard] :is(.topbar, .sidebar, .instrument-bar, .plant-foot, .instrument > .bar, .stage-panel, .footer, .compare) .btn:disabled {
+  opacity: 1; background: var(--bio-surface); color: var(--bio-disabled); border-style: dashed; cursor: not-allowed;
+}
+[data-ui-shell=dashboard] .sidebar .btn.primary { border: 0; background: var(--bio-primary); color: var(--bio-on-primary); font-weight: 600; filter: none; }
+[data-ui-shell=dashboard] .sidebar .btn.primary:hover:not(:disabled) { background: var(--bio-primary-hover); filter: none; }
+[data-ui-shell=dashboard] .sidebar .btn.primary:disabled { background: var(--bio-surface); color: var(--bio-disabled); border: 1px dashed var(--bio-border); }
+[data-ui-shell=dashboard] .sidebar #add-feed { min-height: 36px; margin-top: 2px; }
+[data-ui-shell=dashboard] .topbar #sound { min-height: 36px; }
+[data-ui-shell=dashboard] #stage-buttons { gap: 6px; }
+[data-ui-shell=dashboard] #stage-buttons .btn { min-height: 36px; }
+[data-ui-shell=dashboard] #stage-buttons .btn[aria-pressed=true] { color: var(--bio-primary); border-color: var(--bio-primary); background: var(--bio-raised); outline: 0; }
+[data-ui-shell=dashboard] #stage-buttons .btn.dominant::after { content: " · 主导"; color: var(--bio-muted); font-size: 12px; }
+
+/* ---- Instrument DOM (canvas#vessel and the 3D viewport untouched) ---- */
+[data-ui-shell=dashboard] .instrument-bar { min-height: 48px; border-bottom-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .instrument-bar h2 { margin: 0; font: 600 16px/1.4 var(--bio-font); color: var(--bio-text); text-transform: none; letter-spacing: 0; }
+[data-ui-shell=dashboard] .instrument-bar span, [data-ui-shell=dashboard] .plant-foot, [data-ui-shell=dashboard] .source-line { font: 400 13px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .instrument-bar b { font: 500 14px/1.45 var(--bio-font); color: var(--bio-success); }
+[data-ui-shell=dashboard] .plant-foot { border-top-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .stage-panel h3 { font: 600 16px/1.4 var(--bio-font); color: var(--bio-text); }
+[data-ui-shell=dashboard] .stage-panel small { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .stage-panel strong#stage-value { font: 500 14px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+[data-ui-shell=dashboard] .stage-panel .gas-read { border-bottom-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .stage-panel .gas-read small { font: 500 13px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .stage-panel .gas-read strong { font: 600 36px/1.15 var(--bio-font-metric); font-variant-numeric: tabular-nums lining-nums; }
+[data-ui-shell=dashboard] .stage-panel .gas-read span { font: 400 14px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .instrument > .bar { border-color: var(--bio-divider); }
+[data-ui-shell=dashboard] .instrument > .bar output { font: 400 14px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums; min-width: 72px; }
+[data-ui-shell=dashboard] .instrument > .bar input[type=range] { height: 28px; accent-color: var(--bio-primary); }
+[data-ui-shell=dashboard] .instrument > .bar select, [data-ui-shell=dashboard] .source-line input {
+  height: 36px; padding: 0 8px; border-radius: var(--bio-r-control); border: 1px solid var(--bio-border); background: var(--bio-bg); color: var(--bio-text); font: 400 14px/1.5 var(--bio-font-data);
+}
+[data-ui-shell=dashboard] .source-line input { width: 96px; }
+[data-ui-shell=dashboard] .source-line label { display: inline-flex; align-items: center; gap: var(--bio-s-sm); color: var(--bio-text); font-size: 14px; }
+
+/* KPI row: identity/label → value/unit → delta. Accent rail removed; alarm keeps colour + "超限" text, no shake. */
+[data-ui-shell=dashboard] .kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--bio-s-control); }
+[data-ui-shell=dashboard] .kpi { padding: var(--bio-s-control) var(--bio-s-md); border-radius: var(--bio-r-panel); border-color: var(--bio-divider); background: var(--bio-surface); }
+[data-ui-shell=dashboard] .kpi::before { content: none; }
+[data-ui-shell=dashboard] .kpi .k-label { margin-bottom: 4px; font: 500 13px/1.45 var(--bio-font); letter-spacing: 0; color: var(--bio-muted); }
+[data-ui-shell=dashboard] .kpi .k-value { font: 600 22px/1.25 var(--bio-font-metric); font-variant-numeric: tabular-nums; }
+[data-ui-shell=dashboard] .kpi .k-unit { font: 400 13px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .kpi .delta { font: 400 13px/1.5 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] .kpi .delta.plus, [data-ui-shell=dashboard] .kpi .delta.minus { color: var(--bio-increment); }
+[data-ui-shell=dashboard] .kpi.alarm { border-color: var(--bio-danger); }
+[data-ui-shell=dashboard] .kpi.alarm :is(.number, .delta) { color: var(--bio-danger); }
+[data-ui-shell=dashboard] .alarm .number { animation: none; }
+
+[data-ui-shell=dashboard] .chart h3 { font: 600 14px/1.45 var(--bio-font); color: var(--bio-text); letter-spacing: 0; }
+[data-ui-shell=dashboard] .compare h2 { font: 600 16px/1.4 var(--bio-font); color: var(--bio-text); text-transform: none; letter-spacing: 0; }
+[data-ui-shell=dashboard] table.cmp { font: 400 14px/1.5 var(--bio-font-data); }
+[data-ui-shell=dashboard] table.cmp th { font: 500 13px/1.45 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=dashboard] table.cmp :is(th, td) { border-bottom-color: var(--bio-divider); }
+[data-ui-shell=dashboard] table.cmp .win { color: var(--bio-increment); }
+[data-ui-shell=dashboard] #race strong { font: 600 20px/1.4 var(--bio-font-metric); color: var(--bio-text); }
+[data-ui-shell=dashboard] #race label { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-text); }
+
+[data-ui-shell=dashboard] .footer { flex-wrap: wrap; font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); padding: 4px 0 var(--bio-s-md); }
+[data-ui-shell=dashboard] .footer-actions { flex-wrap: wrap; gap: var(--bio-s-sm); }
+[data-ui-shell=dashboard] .footer-actions a.btn { display: inline-flex; align-items: center; text-decoration: none; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1180px) {
+  [data-ui-shell=dashboard] .layout { grid-template-columns: minmax(0, 1fr); }
+  [data-ui-shell=dashboard] .sidebar { position: static; max-height: none; overflow: visible; }
+  [data-ui-shell=dashboard] .uiSubmit { position: static; }
+}
+@media (max-width: 599px) {
+  [data-ui-shell=dashboard] .layout { padding: 12px; }
+  [data-ui-shell=dashboard] .topbar { padding-inline: 12px; }
+  [data-ui-shell=dashboard] .feed-columns, [data-ui-shell=dashboard] .feed-row { grid-template-columns: minmax(0, 1fr) 76px 44px; }
+  [data-ui-shell=dashboard] .feed-row .remove { width: 44px; }
+  [data-ui-shell=dashboard] :is(.sidebar, .footer, .instrument > .bar, .stage-panel, .compare) .btn, [data-ui-shell=dashboard] .topbar #sound { min-height: 44px; }
+  [data-ui-shell=dashboard] .uiSubmit .actions { grid-template-columns: 1fr; }
+  [data-ui-shell=dashboard] .kpi .k-value { font-size: 20px; }
+}
+
+/* ---- DOM micro-motion: off for prefers-reduced-motion, html[data-ui-still] and dashboard static mode (.static-report). ---- */
+@media (prefers-reduced-motion: no-preference) {
+  [data-ui-shell=dashboard]:not([data-ui-still=true]) :is(.topbar, .sidebar, .instrument-bar, .plant-foot, .instrument > .bar, .stage-panel, .footer, .compare) .btn {
+    transition: background-color var(--ui-motion-fast) var(--ui-ease), border-color var(--ui-motion-fast) var(--ui-ease), color var(--ui-motion-fast) var(--ui-ease), transform 100ms var(--ui-ease);
+  }
+  [data-ui-shell=dashboard]:not([data-ui-still=true]) :is(.sidebar, .footer, .instrument > .bar, .stage-panel) .btn:active:not(:disabled) { transform: translateY(1px); }
+  [data-ui-shell=dashboard]:not([data-ui-still=true]) .uiAdvanced[open] > :not(summary) { animation: ui-fade 160ms var(--ui-ease) both; }
+  [data-ui-shell=dashboard]:not([data-ui-still=true]) .ui-flash { animation: ui-flash 200ms var(--ui-ease) 1; }
+  [data-ui-shell=dashboard]:not([data-ui-still=true]) .status.ok { animation: ui-confirm 280ms var(--ui-ease) 1; }
+}
+@keyframes ui-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ui-flash { from { background-color: color-mix(in srgb, #E3C47E 22%, transparent); } to { background-color: transparent; } }
+@keyframes ui-confirm { from { background-color: color-mix(in srgb, #B9DDA5 18%, var(--bio-bg)); } to { background-color: var(--bio-bg); } }

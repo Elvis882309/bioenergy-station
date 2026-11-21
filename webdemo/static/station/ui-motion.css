@@ -1,0 +1,29 @@
+/* Station DOM micro-motion (DESIGN.md › Motion). Only shell DOM; never canvas, iframe, scene labels,
+   the 3D viewport or #film. Disabled by prefers-reduced-motion and by the station's static mode
+   (workbench.js mirrors #static-mode onto html[data-ui-still]). Business state never waits on these. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-ui-shell=station]:not([data-ui-still=true]) :is(#moduleTabs, .mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) button {
+    transition: background-color var(--ui-motion-fast) var(--ui-ease), border-color var(--ui-motion-fast) var(--ui-ease),
+      color var(--ui-motion-fast) var(--ui-ease), transform 100ms var(--ui-ease);
+  }
+  [data-ui-shell=station]:not([data-ui-still=true]) :is(.mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  /* View side panel: DOM content only, ≤6px offset; the scene is not animated. */
+  [data-ui-shell=station]:not([data-ui-still=true]) .actions > div:not([hidden]),
+  [data-ui-shell=station]:not([data-ui-still=true]) body[data-station=energy] .energyPanel {
+    animation: ui-enter var(--ui-motion-normal) var(--ui-ease) both;
+  }
+  /* Phase / observation text swap */
+  [data-ui-shell=station]:not([data-ui-still=true]) #observation.ui-swap { animation: ui-fade 180ms var(--ui-ease) both; }
+  /* Field value accepted: one background cue, the value itself applies immediately. */
+  [data-ui-shell=station]:not([data-ui-still=true]) .ui-flash { animation: ui-flash 200ms var(--ui-ease) 1; }
+  /* Details: stable native expand, only inner opacity animates. */
+  [data-ui-shell=station]:not([data-ui-still=true]) :is(.actions, .energyPanel) details[open] > :not(summary) { animation: ui-fade 160ms var(--ui-ease) both; }
+  /* Real completion: one cue, text readable from frame 0. */
+  [data-ui-shell=station]:not([data-ui-still=true]) #status[data-tone=success] { animation: ui-confirm 280ms var(--ui-ease) 1; }
+}
+@keyframes ui-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes ui-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ui-flash { from { background-color: color-mix(in srgb, #E3C47E 22%, transparent); } to { background-color: transparent; } }
+@keyframes ui-confirm { from { background-color: color-mix(in srgb, #B9DDA5 18%, transparent); } to { background-color: transparent; } }

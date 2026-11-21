@@ -1,0 +1,208 @@
+/* Station shell (DESIGN.md › Layout / Components). Scope: html[data-ui-shell=station].
+   Never targets #plantViewport descendants, canvas, .station/.energyPins/.energyGate labels,
+   or any scene-owned transform/opacity/filter/pointer-events/touch-action. */
+[data-ui-shell=station] {
+  --page-pad: clamp(16px, calc(1.5vw + 4px), 32px);
+  --shell-h: 84px;
+}
+[data-ui-shell=station] body {
+  background: var(--bio-bg);
+  color: var(--bio-text);
+  font: 400 15px/1.6 var(--bio-font);
+}
+[data-ui-shell=station] :focus-visible { outline: 2px solid var(--bio-primary); outline-offset: 2px; }
+/* Scene labels inherit their font from here: keep the pre-shell value so label size/position are unchanged. */
+[data-ui-shell=station] #plantViewport { font: 15px/1.55 "Inter", "Microsoft YaHei UI", sans-serif; }
+
+/* ---- Global shell: brand row 44px + module tabs 40px ---- */
+[data-ui-shell=station] body > header {
+  max-width: none; min-height: 44px; height: 44px; padding: 0 var(--page-pad);
+  background: var(--bio-surface); border-bottom: 1px solid var(--bio-divider);
+}
+[data-ui-shell=station] .brand { font: 600 15px/1.3 var(--bio-font); color: var(--bio-text); white-space: nowrap; }
+[data-ui-shell=station] .brand span { color: var(--bio-muted); font-weight: 400; }
+[data-ui-shell=station] body > header nav { gap: var(--bio-s-md); font-size: 14px; color: var(--bio-text); }
+[data-ui-shell=station] body > header nav label { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; }
+[data-ui-shell=station] body > header nav input { width: 16px; height: 16px; margin: 0; accent-color: var(--bio-primary); }
+[data-ui-shell=station] .uiScope { color: var(--bio-muted); font-size: 13px; padding-right: var(--bio-s-sm); border-right: 1px solid var(--bio-divider); }
+
+[data-ui-shell=station] #moduleTabs {
+  height: 40px; padding: 0 var(--page-pad); gap: 2px;
+  background: var(--bio-surface); border-bottom: 1px solid var(--bio-divider);
+}
+[data-ui-shell=station] #moduleTabs button {
+  position: relative; min-height: 40px; padding: 0 12px; border-radius: 0;
+  font: 500 14px/1.45 var(--bio-font); color: var(--bio-muted);
+  border-bottom: 2px solid transparent; background: transparent;
+}
+[data-ui-shell=station] #moduleTabs button:hover { color: var(--bio-text); background: var(--bio-raised); }
+[data-ui-shell=station] #moduleTabs [aria-selected=true] { color: var(--bio-primary); border-bottom-color: var(--bio-primary); background: var(--bio-raised); }
+[data-ui-shell=station] #moduleTabs button:focus-visible { outline: 2px solid var(--bio-primary); outline-offset: -3px; }
+/* Light grouping: sandbox | model analysis | research tools | legacy dashboard. Order and routes unchanged. */
+[data-ui-shell=station] #moduleTabs :is(#tab-trace, #tab-calibration, #tab-dashboard) { margin-left: 13px; }
+[data-ui-shell=station] #moduleTabs :is(#tab-trace, #tab-calibration, #tab-dashboard)::before {
+  content: ""; position: absolute; left: -8px; top: 12px; bottom: 12px; width: 1px; background: var(--bio-divider); pointer-events: none;
+}
+[data-ui-shell=station] .modulePane { height: calc(100dvh - var(--shell-h)); background: var(--bio-bg); }
+[data-ui-shell=station] .modulePane .moduleStatus {
+  top: var(--bio-s-md); left: var(--page-pad); padding: 8px 12px; border: 1px solid var(--bio-divider);
+  border-radius: var(--bio-r-control); background: var(--bio-surface); color: var(--bio-text); font-size: 14px;
+}
+[data-ui-shell=station] .modulePane .moduleStatus button { margin-left: var(--bio-s-sm); min-height: 32px; }
+/* ---- Station workspace ---- */
+[data-ui-shell=station] main#panel-station { max-width: 1600px; padding: 0 var(--page-pad) var(--bio-s-lg); }
+[data-ui-shell=station] :is(.yard, aside > section, #status) { scroll-margin-top: 52px; }
+[data-ui-shell=station] .headline { padding: var(--bio-s-md) 0 var(--bio-s-control); gap: var(--bio-s-md); align-items: flex-end; }
+[data-ui-shell=station] .headline small { display: block; font: 400 13px/1.5 var(--bio-font); letter-spacing: .04em; color: var(--bio-muted); }
+[data-ui-shell=station] .headline h1 { font: 600 24px/1.25 var(--bio-font); letter-spacing: -.01em; color: var(--bio-text); }
+[data-ui-shell=station] .headline .tag {
+  font: 500 13px/1.45 var(--bio-font); color: var(--bio-text); border: 1px solid var(--bio-border);
+  border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+}
+[data-ui-shell=station] .layout { grid-template-columns: minmax(0, 1fr) clamp(320px, 24vw, 360px); gap: clamp(16px, 1.4vw, 24px); }
+[data-ui-shell=station] :is(.yard, .actions, .readings, .energyPanel) {
+  background: var(--bio-surface); border: 1px solid var(--bio-divider); border-radius: var(--bio-r-panel);
+}
+[data-ui-shell=station] aside { display: flex; flex-direction: column; gap: var(--bio-s-control); min-width: 0; }
+[data-ui-shell=station] aside > .actions { margin-top: 0; }
+[data-ui-shell=station] .mission { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--bio-s-control); padding: var(--bio-s-control) var(--bio-s-md); background: var(--bio-raised); }
+[data-ui-shell=station] .mission label { margin: 0; font: 500 14px/1.45 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=station] .mission p { flex: 1 1 320px; margin: 0; font-size: 13px; color: var(--bio-muted); }
+[data-ui-shell=station] .mission p.ok { color: var(--bio-success); }
+[data-ui-shell=station] .mission p.attention { color: var(--bio-warning); }
+
+/* Shell controls (scene labels excluded on purpose). */
+[data-ui-shell=station] :is(.mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) :is(button, select, input[type=number]) {
+  min-height: var(--bio-control-h); border-radius: var(--bio-r-control); font: 500 14px/1.45 var(--bio-font);
+}
+[data-ui-shell=station] :is(.mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) button {
+  padding: 0 var(--bio-s-control); background: var(--bio-raised); color: var(--bio-text); border: 1px solid var(--bio-divider);
+}
+[data-ui-shell=station] :is(.mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) button:hover:not(:disabled) { border-color: var(--bio-border); color: var(--bio-text); background: color-mix(in srgb, var(--bio-raised) 82%, var(--bio-primary)); }
+[data-ui-shell=station] :is(.mission, .dock, .time, .actions, .energyPanel, .energyTime, dialog .bar) button:disabled {
+  opacity: 1; background: var(--bio-surface); color: var(--bio-disabled); border-style: dashed; border-color: var(--bio-divider); cursor: not-allowed;
+}
+[data-ui-shell=station] :is(.dock, .actions) button[aria-pressed=true] { background: var(--bio-raised); color: var(--bio-primary); border-color: var(--bio-primary); }
+[data-ui-shell=station] .actions button.primary {
+  width: 100%; margin: var(--bio-s-sm) 0 0; padding: 0 var(--bio-s-md); border: 0;
+  background: var(--bio-primary); color: var(--bio-on-primary); font-weight: 600;
+}
+[data-ui-shell=station] .actions button.primary:hover:not(:disabled) { background: var(--bio-primary-hover); color: var(--bio-on-primary); }
+[data-ui-shell=station] .actions button.primary:disabled { background: var(--bio-surface); color: var(--bio-disabled); border: 1px dashed var(--bio-border); }
+[data-ui-shell=station] :is(.mission, .time, .actions, .energyPanel) :is(select, input[type=number]) {
+  background: var(--bio-bg); color: var(--bio-text); border: 1px solid var(--bio-border); padding: 0 10px; font-family: var(--bio-font-data); font-variant-numeric: tabular-nums;
+}
+[data-ui-shell=station] .mission select { font-family: var(--bio-font); font-weight: 600; }
+[data-ui-shell=station] .actions input[type=number] { width: 104px; text-align: right; }
+[data-ui-shell=station] .actions input:invalid { border-color: var(--bio-danger); }
+
+/* Dock: view group (aria-pressed) then a separate entry group. */
+[data-ui-shell=station] .dock { gap: var(--bio-s-sm); padding: 10px var(--bio-s-md); border-top: 1px solid var(--bio-divider); }
+[data-ui-shell=station] .dock button { margin: 0; }
+[data-ui-shell=station] .dock [data-view=energy] { margin-left: var(--bio-s-md); position: relative; }
+[data-ui-shell=station] .dock [data-view=energy]::before { content: ""; position: absolute; left: -13px; top: 8px; bottom: 8px; width: 1px; background: var(--bio-divider); pointer-events: none; }
+
+/* Playback group */
+[data-ui-shell=station] .time { gap: var(--bio-s-sm) var(--bio-s-control); padding: 10px var(--bio-s-md); border-top: 1px solid var(--bio-divider); font: 500 14px/1.45 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=station] .time button#play { min-width: 64px; }
+[data-ui-shell=station] .time input[type=range] { min-height: 32px; accent-color: var(--bio-primary); }
+[data-ui-shell=station] .uiClock { display: inline-flex; align-items: baseline; gap: 2px; min-width: 9.5em; justify-content: flex-end; font: 400 14px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+[data-ui-shell=station] .uiTimeTotal { color: var(--bio-muted); }
+[data-ui-shell=station] .uiLockHint { display: none; flex-basis: 100%; font: 400 13px/1.5 var(--bio-font); letter-spacing: 0; color: var(--bio-muted); }
+[data-ui-shell=station] .time[data-ui-locked=true] .uiLockHint { display: block; }
+/* ---- Operating panel (right column) ---- */
+[data-ui-shell=station] :is(.actions, .readings, .energyPanel) { padding: var(--bio-s-panel); }
+[data-ui-shell=station] aside small, [data-ui-shell=station] .energyPanel > small { font: 500 13px/1.5 var(--bio-font); letter-spacing: .04em; color: var(--bio-muted); }
+[data-ui-shell=station] .actions h2, [data-ui-shell=station] .energyPanel h2 { font: 600 20px/1.4 var(--bio-font); color: var(--bio-text); margin: 2px 0 var(--bio-s-sm); }
+[data-ui-shell=station] .actions p { font-size: 14px; line-height: 1.6; color: var(--bio-muted); margin: 0 0 var(--bio-s-control); }
+[data-ui-shell=station] .actions label { min-height: var(--bio-control-h); margin: var(--bio-s-sm) 0; gap: var(--bio-s-control); font: 500 14px/1.45 var(--bio-font); color: var(--bio-text); }
+[data-ui-shell=station] .actions label:has(> input[type=checkbox]) { justify-content: flex-start; }
+[data-ui-shell=station] .actions input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--bio-primary); }
+[data-ui-shell=station] .actions button { margin: 2px 0; }
+[data-ui-shell=station] #cards, [data-ui-shell=station] #shots { gap: var(--bio-s-sm); }
+[data-ui-shell=station] #cards button { flex: 1 1 88px; }
+[data-ui-shell=station] #drop { margin: var(--bio-s-control) 0; padding: var(--bio-s-sm) var(--bio-s-control); border: 1px dashed var(--bio-border); border-radius: var(--bio-r-control); background: var(--bio-bg); }
+[data-ui-shell=station] #drop.over { border-color: var(--bio-primary); border-style: solid; }
+[data-ui-shell=station] #feedRows label { margin: 4px 0; }
+[data-ui-shell=station] #feedRows label span { min-width: 0; font-weight: 500; }
+[data-ui-shell=station] #feedRows small { display: block; margin-top: 1px; font: 400 12px/1.4 var(--bio-font-data); letter-spacing: 0; color: var(--bio-muted); overflow-wrap: anywhere; user-select: all; }
+[data-ui-shell=station] #mix { height: 6px; margin-top: var(--bio-s-sm); border-radius: 3px; }
+[data-ui-shell=station] .actions #total { margin: var(--bio-s-sm) 0 0; font: 400 13px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+[data-ui-shell=station] .actions details, [data-ui-shell=station] .energyPanel details { margin: var(--bio-s-control) 0; border-top: 1px solid var(--bio-divider); padding-top: var(--bio-s-sm); }
+[data-ui-shell=station] :is(.actions, .energyPanel) summary {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--bio-s-sm); min-height: 36px; padding: 6px 0;
+  font: 500 14px/1.45 var(--bio-font); color: var(--bio-primary); cursor: pointer; list-style-position: inside;
+}
+[data-ui-shell=station] :is(.actions, .energyPanel) summary::-webkit-details-marker { color: var(--bio-primary); }
+[data-ui-shell=station] .uiSummary { flex-basis: 100%; font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); }
+[data-ui-shell=station] .uiSummary[data-changed=true] { color: var(--bio-increment); }
+[data-ui-shell=station] .actions a { color: var(--bio-primary); }
+[data-ui-shell=station] .actions input[type=file] { max-width: 100%; margin-top: var(--bio-s-sm); font-size: 13px; color: var(--bio-muted); }
+[data-ui-shell=station] .actions label[data-ui-changed=true] > input { border-color: var(--bio-increment); }
+[data-ui-shell=station] .actions .note { font-size: 13px; }
+[data-ui-shell=station] #observation { color: var(--bio-text); font-size: 14px; }
+[data-ui-shell=station] .actions table { font: 400 13px/1.5 var(--bio-font-data); font-variant-numeric: tabular-nums; }
+[data-ui-shell=station] .actions :is(td, th) { padding: 6px 4px; border-bottom-color: var(--bio-divider); }
+[data-ui-shell=station] .actions th { font: 500 13px/1.45 var(--bio-font); color: var(--bio-muted); }
+[data-ui-shell=station] .actions caption { text-align: left; font: 500 13px/1.5 var(--bio-font); color: var(--bio-muted); padding-top: var(--bio-s-sm); }
+[data-ui-shell=station] #comparison > p:first-child { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-text); overflow-wrap: anywhere; }
+
+/* Readings: compact empty state, then identity → value/unit → pair → delta. */
+[data-ui-shell=station] .readings .meter { color: var(--bio-primary); font: 500 14px/1.45 var(--bio-font); margin-top: var(--bio-s-sm); }
+[data-ui-shell=station] .readings .meter b { font: 600 36px/1.15 var(--bio-font-metric); font-variant-numeric: tabular-nums lining-nums; color: var(--bio-text); }
+[data-ui-shell=station] .readings > p { font-size: 13px; color: var(--bio-muted); }
+[data-ui-shell=station] .readings .pair { gap: var(--bio-s-xl); margin-top: var(--bio-s-control); padding-top: var(--bio-s-control); border-top-color: var(--bio-divider); font-size: 13px; color: var(--bio-muted); }
+[data-ui-shell=station] .readings .pair strong { font: 600 22px/1.25 var(--bio-font-metric); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+[data-ui-shell=station] .readings #delta { margin-top: var(--bio-s-sm); font-size: 13px; color: var(--bio-increment); }
+[data-ui-shell=station] .readings .uiEmpty { display: none; margin-top: 4px; font-size: 14px; color: var(--bio-text); }
+[data-ui-shell=station] .readings[data-ui-empty=true] { padding-block: var(--bio-s-md); }
+[data-ui-shell=station] .readings[data-ui-empty=true] .uiEmpty { display: block; }
+[data-ui-shell=station] .readings[data-ui-empty=true] > :is(.meter, .meter + p, .pair, #delta) { display: none; }
+
+/* Status: text states, persistent (not a toast). */
+[data-ui-shell=station] #status { margin: 0; padding: 0 2px; font: 400 13px/1.55 var(--bio-font); color: var(--bio-muted); overflow-wrap: anywhere; }
+[data-ui-shell=station] #status:empty { display: none; }
+[data-ui-shell=station] #status[data-tone=success] { color: var(--bio-success); }
+[data-ui-shell=station] #status[data-tone=error] { color: var(--bio-danger); }
+[data-ui-shell=station] #status[data-tone=busy], [data-ui-shell=station] #status[data-tone=draft] { color: var(--bio-warning); }
+
+/* Energy section DOM (scene and #film untouched). */
+[data-ui-shell=station] .energyPanel dl { background: var(--bio-bg); border-radius: var(--bio-r-control); }
+[data-ui-shell=station] .energyPanel dd { font: 600 16px/1.4 var(--bio-font-data); font-variant-numeric: tabular-nums; color: var(--bio-text); }
+[data-ui-shell=station] .energyPanel label { font-size: 14px; }
+[data-ui-shell=station] #energyDifference { font-size: 13px; color: var(--bio-text); }
+[data-ui-shell=station] .energyTracks { border-top-color: var(--bio-divider); }
+
+/* Core dialog frame: title, return, Esc behaviour untouched. */
+[data-ui-shell=station] dialog#coreDialog { border-radius: var(--bio-r-dialog); border-color: var(--bio-border); background: var(--bio-bg); box-shadow: var(--bio-shadow-overlay); }
+[data-ui-shell=station] dialog#coreDialog .bar { border-bottom: 1px solid var(--bio-divider); }
+[data-ui-shell=station] dialog#coreDialog .bar b { font: 600 16px/1.4 var(--bio-font); }
+[data-ui-shell=station] dialog#coreDialog .bar span { font: 400 13px/1.5 var(--bio-font-data); color: var(--bio-muted); }
+
+/* ---- Responsive ---- */
+@media (max-width: 1199px) {
+  [data-ui-shell=station] .layout { grid-template-columns: minmax(0, 1fr) 320px; }
+}
+@media (max-width: 899px) {
+  [data-ui-shell=station] .layout { grid-template-columns: minmax(0, 1fr); }
+  [data-ui-shell=station] .headline { padding: var(--bio-s-control) 0 var(--bio-s-sm); }
+}
+@media (max-width: 599px) {
+  [data-ui-shell=station] { --page-pad: 12px; }
+  [data-ui-shell=station] body > header nav { gap: var(--bio-s-sm); font-size: 13px; }
+  [data-ui-shell=station] .uiScope { font-size: 12px; }
+  [data-ui-shell=station] #moduleTabs { height: 44px; scroll-padding-inline: 12px; }
+  [data-ui-shell=station] #moduleTabs button { min-height: 44px; padding: 0 10px; font-size: 14px; }
+  [data-ui-shell=station] { --shell-h: 88px; }
+  [data-ui-shell=station] .headline { flex-wrap: wrap; align-items: flex-start; }
+  [data-ui-shell=station] .headline h1 { font-size: 22px; }
+  [data-ui-shell=station] .dock { padding: var(--bio-s-sm); }
+  [data-ui-shell=station] .dock button { flex: 1 1 auto; }
+  [data-ui-shell=station] .dock [data-view=energy] { margin-left: 0; }
+  [data-ui-shell=station] .dock [data-view=energy]::before { display: none; }
+  [data-ui-shell=station] .time { padding: var(--bio-s-sm); }
+  [data-ui-shell=station] .time label { flex: 1 1 auto; }
+  [data-ui-shell=station] .time input[type=range] { flex: 1 1 100%; }
+  [data-ui-shell=station] .actions label:not(:has(> input[type=checkbox])) { flex-wrap: wrap; }
+  [data-ui-shell=station] :is(.actions, .readings, .energyPanel) { padding: var(--bio-s-md); }
+}

@@ -1,0 +1,49 @@
+/* Precision Field Console tokens (DESIGN.md front matter). Namespaced; only consumed by
+   [data-ui-shell] scoped rules in ui-shell.css / ui-dashboard.css. Does not touch canvas or scene styles. */
+[data-ui-shell] {
+  --bio-primary: #9BE3CC;
+  --bio-primary-hover: #B8EFDD;
+  --bio-on-primary: #10271F;
+  --bio-bg: #101817;
+  --bio-surface: #182321;
+  --bio-raised: #202E2A;
+  --bio-text: #EDF3ED;
+  --bio-muted: #B0C0B8;
+  --bio-border: #7F978B;
+  --bio-divider: color-mix(in srgb, #7F978B 34%, #182321);
+  --bio-baseline: #CCD5CE;
+  --bio-increment: #E3C47E;
+  --bio-warning: #F0C28B;
+  --bio-danger: #FFB2A3;
+  --bio-success: #B9DDA5;
+  --bio-disabled: #A3B0A9;
+
+  --bio-font: "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --bio-font-metric: "Bahnschrift", "DIN Alternate", "Consolas", monospace;
+  --bio-font-data: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  --bio-r-xs: 4px;
+  --bio-r-control: 6px;
+  --bio-r-panel: 10px;
+  --bio-r-dialog: 12px;
+
+  --bio-s-xs: 4px;
+  --bio-s-sm: 8px;
+  --bio-s-control: 12px;
+  --bio-s-md: 16px;
+  --bio-s-panel: 20px;
+  --bio-s-lg: 24px;
+  --bio-s-xl: 32px;
+
+  --bio-control-h: 40px;
+  --bio-shadow-overlay: 0 12px 36px rgba(0, 0, 0, .28);
+
+  /* Motion extension (DESIGN.md › Motion; not an exported token). */
+  --ui-motion-fast: 120ms;
+  --ui-motion-normal: 200ms;
+  --ui-motion-panel: 240ms;
+  --ui-ease: cubic-bezier(.2, .8, .2, 1);
+}
+@media (max-width: 599px) {
+  [data-ui-shell] { --bio-control-h: 44px; }
+}
