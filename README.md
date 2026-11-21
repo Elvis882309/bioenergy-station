@@ -2,7 +2,7 @@
 
 中国农业大学烟台研究院 · AgriHackathon 主赛道作品。用同一套厌氧消化模型比较农业废弃物进料方案，查看每天的产气、甲烷占比和 pH，以及整段时间累计多产或少产了多少气。
 
-[打开试验站](https://elvis882309.github.io/bioenergy-station/) · 固定版本：[v1.1.0-agri](https://github.com/Elvis882309/bioenergy-station/tree/v1.1.0-agri)
+[打开试验站](https://elvis882309.github.io/bioenergy-station/) · 固定版本：[v1.1.1-agri](https://github.com/Elvis882309/bioenergy-station/tree/v1.1.1-agri)
 
 ## 评委体验路径
 
@@ -21,6 +21,8 @@
 本次界面改版（2026-11）只涉及控制台外壳与 DOM 微动效；模型、数据、记录和公开版语义未变：公开版仍读取预计算记录，不在浏览器里现场求解。
 
 ## 从源码运行自定义工况
+
+以下步骤运行的是当前 main（固定版本 v1.1.1-agri）的源码，打开后即为 2026-11 新版控制台界面。8848 是本机后端模式，与公网演示的预计算记录模式不同。
 
 建议使用 Python 3.12，在仓库根目录的虚拟环境中执行：
 
