@@ -6,9 +6,4 @@
 .modulePane .moduleStatus{position:absolute;top:10px;left:12px;padding:6px 12px;background:#172320;color:#dfebe4;font-size:13px}
 #panel-station.inactiveStation{position:fixed;left:-200vw;top:0;width:100%;visibility:hidden;pointer-events:none}
 @media(max-width:650px){#moduleTabs{padding-inline:6px}#moduleTabs button{font-size:13px;padding:7px 9px}}
-
-body>header { min-height:44px; background:#161c1b; }
-#moduleTabs { background:#161c1b; padding-block:0; }
-#moduleTabs button { min-height:36px; padding-block:6px; }
-#moduleTabs button:focus-visible { outline:2px solid var(--mint); outline-offset:-3px; }
-.modulePane { height:calc(100dvh - 82px); }
+/* Header/tab sizing and module pane height now live in ui-shell.css ([data-ui-shell=station]). */
