@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><script src="/bioenergy-station/static/pages-client.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyADM1ODE · 三通道分步</title>
+<link rel="stylesheet" href="/bioenergy-station/static/trace.css">
+</head>
+<body>
+
+<canvas id="stage"></canvas>
+
+<div class="hud hud-tl">
+  <div class="hud-title">PyADM1ODE <span class="dim">/ 三通道分步</span></div>
+  <div class="hud-sub" id="meta-line">正在记录三条求解通道…</div>
+</div>
+
+<div class="hud hud-tr">
+  <div class="stat"><span class="k">T</span><span class="v" id="v-t">—</span><span class="u">d</span></div>
+</div>
+
+<div class="heads" id="heads"></div>
+
+<div class="note" id="note"></div>
+
+<aside id="comparison" aria-label="配方累计产气对照">
+  <h2>累计产气对照 <small>m³</small></h2>
+  <p>青贮日进料率：11.4 → 12.4 m³/d<br>两案同用 BDF，其他条件相同。</p>
+  <div class="totals"><div><strong id="refVolume">—</strong><div class="well"><i id="refBar"></i></div><span>原配方</span></div>
+  <div><strong id="altVolume">—</strong><div class="well"><i id="altBar"></i></div><span>加料方案</span></div></div>
+  <p id="difference"></p><small id="axisInfo">累计生产量 · 非储气库存</small>
+  <p id="compareStatus" role="status">等待求解记录</p><button id="retryCompare" hidden>重试对照计算</button>
+</aside>
+<div class="dock">
+  <button id="play" class="command" disabled>连续推演</button>
+  <button id="step" class="command" disabled title="前往三个通道中下一个不同的已记录仿真时刻">下一记录点</button>
+  <button id="event" class="command" disabled>定位温度阶跃</button>
+  <button id="origin" class="command" disabled>回到起点</button>
+  <div class="speed" id="speed">
+    <button data-s="0.5">0.5×</button>
+    <button data-s="1" class="on">1×</button>
+    <button data-s="2">2×</button>
+    <button data-s="4">4×</button>
+  </div>
+  <input type="range" id="scrub" min="0" max="1000" value="0" step="1" aria-label="定位仿真日" disabled>
+  <div class="clock" id="clock">0.0 d</div>
+  <a class="back" href="/bioenergy-station/static/index.html">← 仪表盘</a>
+</div>
+
+<div class="credit">
+  视觉参考 <a href="https://github.com/Ryder191/haloflux" target="_blank" rel="noopener">HALOFLUX</a> by Ryder191（非商业）<br>
+  三条曲线均为求解器真实步序列
+</div>
+
+<div class="loading" id="loading">
+  <div class="spin"></div>
+  <div>正在用三种积分器各跑一遍…</div>
+</div>
+
+<script src="/bioenergy-station/static/trace.js"></script>
+</body>
+</html>

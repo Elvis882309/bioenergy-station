@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><script src="/bioenergy-station/static/pages-client.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyADM1ODE · 厌氧消化可视化平台</title>
+<link rel="stylesheet" href="/bioenergy-station/static/style.css">
+<link rel="stylesheet" href="/bioenergy-station/static/dashboard.css">
+<script src="/bioenergy-station/static/plotly.min.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">AD</div>
+    <div class="titles">
+      <h1>PyADM1ODE</h1>
+      <p>厌氧消化运行仪表盘</p>
+    </div>
+  </div>
+  <div class="badges">
+    <label><input id="static-mode" type="checkbox"> 静态模式</label><button id="sound" class="btn tiny ghost" aria-pressed="false">音效关</button><span class="badge" id="badge-model">ADM1da · 41 状态</span>
+    <span class="badge" id="badge-version">v0.6.2</span>
+    <span class="badge accent" id="badge-backend">scipy</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <section class="card">
+      <h2>进料配比</h2>
+      <div class="feed-columns" aria-hidden="true"><span>原料</span><span>m³/d</span></div>
+      <div id="feed-rows" class="feed-rows"></div>
+      <button id="add-feed" class="btn tiny ghost">+ 添加基质</button>
+      <div class="feed-total">总进料 <strong id="feed-total">0.0</strong> <span>m³/d</span></div>
+    </section>
+
+    <section class="card">
+      <h2>消化器参数</h2>
+      <div class="field">
+        <label for="temp">温度 <output id="temp-out">42.0</output> <span class="unit">°C</span></label>
+        <input type="range" id="temp" min="20" max="60" step="0.5" value="42">
+      </div>
+      <div class="field">
+        <label for="vliq">液体体积 <span class="unit">m³</span></label>
+        <input type="number" id="vliq" min="100" max="20000" step="50" value="1050">
+      </div>
+      <div class="field">
+        <label for="vgas">气室体积 <span class="unit">m³</span></label>
+        <input type="number" id="vgas" min="10" max="5000" step="10" value="150">
+      </div>
+      <div class="field">
+        <label for="kla">传质系数 k<sub>L</sub>a <output id="kla-out">200</output> <span class="unit">d⁻¹</span></label>
+        <input type="range" id="kla" min="10" max="800" step="10" value="200">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>仿真设置</h2>
+      <div class="field two">
+        <div>
+          <label for="duration">天数 <span class="unit">d</span></label>
+          <input type="number" id="duration" min="10" max="1000" step="10" value="150">
+        </div>
+        <div>
+          <label for="dt">步长 dt <span class="unit">d</span></label>
+          <input type="number" id="dt" min="0.25" max="5" step="0.25" value="1">
+        </div>
+      </div>
+      <div class="field">
+        <label for="backend">求解器</label>
+        <select id="backend">
+          <option value="scipy">scipy · BDF（默认）</option>
+          <option value="adm1jl">ADM1jl · Rodas4P（Julia）</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="run" class="btn primary">开始仿真</button>
+      <button id="compare" class="btn">两求解器对比</button>
+      <button id="reset" class="btn ghost">恢复默认</button>
+    </div>
+    <div id="status" class="status">就绪</div>
+  </aside>
+
+  <main class="main">
+
+    <section class="card yard" id="plant" data-phase="feed" aria-label="三维工艺沙盘">
+      <div class="instrument-bar"><h2>三维工艺沙盘</h2><span id="plant-status">点击罐体查看内部</span><button id="overview" class="btn tiny ghost" hidden>返回全景</button></div>
+      <div id="plantViewport">
+        <canvas id="vatScene" aria-label="三维设备，可拖动旋转"></canvas>
+        <div class="viewTools"><span>拖动旋转</span><button id="resetView" class="btn tiny ghost" hidden>重置视角</button></div>
+        <div class="plant-line"><button id="feedNode" class="btn station">进料罐</button><button id="digNode" class="btn station">厌氧消化罐</button><button id="gasNode" class="btn station">产气计量</button></div>
+        <div id="inspectionTools" hidden><span id="shotLabel"></span><button id="previewShot" class="btn tiny">预演反应镜头</button></div>
+      </div>
+      <div class="plant-foot"><span id="plant-reading">进料 → 消化 → 集气</span><button id="plant-action" class="btn tiny" hidden></button></div>
+    </section>
+    <section class="card instrument">
+      <div class="instrument-bar"><h2>反应器运行视图</h2><span id="mode-label">等待求解</span><b id="steady" hidden>产气稳态达成 ✓</b></div>
+      <div class="instrument-grid"><div class="vessel-wrap"><canvas id="vessel" aria-label="反应器粒子剖面，四阶段可用右侧按钮选择"></canvas>
+        </div>
+        <div class="stage-panel"><div class="gas-read"><small>沼气流量</small><strong id="flow-now">—</strong><span>m³/d</span></div><h3>反应阶段</h3><div id="stage-buttons"></div><strong id="stage-value"></strong><small id="stage-detail"></small></div></div>
+      <div class="bar"><button id="play" class="btn tiny" disabled>播放</button><output id="stamp">— d</output>
+        <input aria-label="回放时间点" id="seek" type="range" min="0" max="0" value="0" disabled>
+        <select aria-label="回放速度" id="speed"><option>0.5×</option><option selected>1×</option><option>2×</option><option>4×</option></select></div>
+      <div class="source-line"><span id="origin">PyADM1ODE 模型仿真</span><label>VFA/TAC 告警比值 <input type="number" min="0.01" step="any" id="ratio-limit" placeholder="未设置"></label></div>
+    </section>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="charts">
+      <div class="card chart"><h3>产气速率</h3><div id="chart-gas" class="plot"></div></div>
+      <div class="card chart"><h3>甲烷占比</h3><div id="chart-pct" class="plot"></div></div>
+      <div class="card chart"><h3>pH</h3><div id="chart-ph" class="plot"></div></div>
+      <div class="card chart"><h3>VFA / TAC</h3><div id="chart-vfa" class="plot"></div></div>
+    </section>
+
+    <section class="card compare" id="compare-panel" hidden>
+      <h2>求解器对比</h2>
+      <div id="race"></div><div id="compare-body"></div>
+    </section>
+
+    <footer class="footer">
+      <span id="run-meta">尚未仿真</span>
+      <div class="footer-actions">
+        <a class="btn tiny ghost" href="/bioenergy-station/static/engine.html" target="_blank" rel="noopener">求解引擎 →</a>
+        <a class="btn tiny ghost" href="/bioenergy-station/static/system.html" target="_blank" rel="noopener">组件系统 · 三通道 →</a>
+        <a class="btn tiny ghost" href="/bioenergy-station/static/trace.html" target="_blank" rel="noopener">三通道分步 →</a>
+        <a class="btn tiny ghost" href="/bioenergy-station/static/calibration.html" target="_blank" rel="noopener">参数标定 →</a>
+        <a class="btn tiny ghost" href="/bioenergy-station/static/estimation.html" target="_blank" rel="noopener">状态估计 →</a>
+        <button id="export" class="btn tiny ghost" disabled>导出 CSV</button>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/bioenergy-station/static/app.js"></script>
+<script src="/bioenergy-station/static/dashboard.js"></script>
+<script src="/bioenergy-station/static/plant/three.min.js"></script>
+<script src="/bioenergy-station/static/plant/gsap.min.js"></script>
+<script src="/bioenergy-station/static/plant/reactor05.js"></script>
+<script src="/bioenergy-station/static/plant/plant.js"></script>
+<script src="/bioenergy-station/static/plant/link.js"></script>
+</body>
+</html>

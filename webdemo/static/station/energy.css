@@ -1,0 +1,20 @@
+.energyOnly,.energyPins,.energyGate{display:none}
+body[data-station=overview] .energyGate{display:block;position:absolute;right:12px;top:12px;color:#d4eddb;background:#20372dee;border-color:#728b77;font-size:13px}
+body[data-station=energy] :is(.energyPins,.energyOnly){display:block}
+body[data-station=energy] :is(.yard .mission,.yard .time,.plant-line,.actions,.readings,#status,#inspectionTools,.bin-label,#core){display:none!important}
+.energyPins button{position:absolute;transform:translate(-50%,-50%);background:#15251fed;color:#c6dfcc;border-color:#749486;white-space:nowrap;font-size:13px}
+.energyPins [data-pin=g1]{left:15%;top:40%}.energyPins [data-pin=g2]{left:37%;top:35%}.energyPins [data-pin=chp]{left:55%;top:38%}.energyPins [data-pin=h1]{left:80%;top:45%}.energyPins [data-pin=h2]{left:74%;top:64%}
+.energyPanel,.energyTracks{border:1px solid var(--line);border-radius:12px;padding:17px 20px;background:var(--panel)}
+.energyTracks{border:0;border-top:1px solid var(--line);border-radius:0}
+.energyPanel h2{font-size:30px}.energyPanel details{color:var(--muted);font-size:13px}.energyPanel dl{margin:15px 0;background:#101d19;padding:8px 12px;border-radius:6px}
+.energyPanel dl div,.trackHead,.energyTime,.energyChecks{display:flex;align-items:center;justify-content:space-between;gap:8px}.energyPanel dl div{border-bottom:1px solid #2a3a32;padding:4px 0}.energyPanel dl div:last-child{border:0}.energyPanel dd{font:600 16px Consolas,monospace;color:#b9f1d6;margin:0}
+.energyPanel label{display:block;margin:5px 0}.energyChecks{justify-content:start;flex-wrap:wrap;font-size:13px;margin:10px 0}.energyPanel select{margin-left:8px}.energyTime input{flex:1;accent-color:var(--mint);min-width:40px}.energyTime output{font-variant-numeric:tabular-nums}
+#energyDifference{font-size:13px;margin:8px 0;color:#cee0c8}.energyTracks #film{max-width:790px;margin:auto}.energyTime{padding-top:6px}#energySettings{margin-bottom:8px}
+body[data-station=energy] #plantViewport[data-render=preview]{background:#1b2a25}
+#plantViewport .shotCaption{pointer-events:none;position:absolute;bottom:12px;left:14px;max-width:calc(100% - 28px);background:#11221fed;border-left:3px solid var(--cue,#bbdfaa);padding:7px 12px;color:#e8f3ed}
+.shotCaption small,.shotCaption b,.shotCaption span{display:block}.shotCaption small{color:var(--cue,#bbdfaa);font-size:11px}.shotCaption span{font-size:12px;color:#c4d6ca}
+body[data-station=energy] #plantViewport[data-inspecting=true] .energyPins{position:absolute;top:10px;right:10px;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:67%}
+#plantViewport[data-inspecting=true] .energyPins button{position:static;transform:none;font-size:12px;padding:3px 7px}
+@media(max-width:650px){body[data-station=energy] #plantViewport[data-inspecting=true] .energyPins{top:44px;max-width:98%;right:4px}#plantViewport .shotCaption{bottom:4px;left:4px;padding:3px 8px}.shotCaption small{display:none}.shotCaption b{font-size:13px}.shotCaption span{font-size:11px}.trackHead{align-items:flex-start;flex-direction:column;gap:2px}}
+#plantViewport[data-render=preview] .energyPins button{position:static;transform:none}#plantViewport[data-render=preview] .energyPins{position:absolute;inset:40% 8% auto;text-align:center}
+@media(max-width:650px){.energyTracks,.energyPanel{padding:12px}.energyPins button{font-size:11px;padding:3px}.trackHead small{font-size:10px}}

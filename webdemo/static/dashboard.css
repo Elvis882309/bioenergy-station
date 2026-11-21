@@ -1,0 +1,47 @@
+.instrument{padding:0;overflow:hidden;background:radial-gradient(ellipse at 30% 15%,#183032 0,transparent 49%),#0d161d}
+.instrument-bar,.bar,.source-line{display:flex;align-items:center;gap:14px;padding:12px 18px}
+.instrument-bar{border-bottom:1px solid #26383e}.instrument-bar h2{margin:0;color:#d4ece4}.instrument-bar span,.source-line{color:#a1b7bc;font-size:12px}.instrument-bar b{margin-left:auto;color:#abebbd;font-size:13px}
+.instrument-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,32%);align-items:center;padding:0 18px;gap:20px}
+.vessel-wrap{position:relative}.vessel-wrap canvas{width:100%;height:235px;display:block}.gas-read{pointer-events:none;position:absolute;left:50%;top:40%;transform:translateX(-50%);text-align:center;line-height:1.25;display:grid;color:#d6fff4;text-shadow:0 1px 8px #002727}.gas-read strong{font:700 clamp(21px,2.1vw,35px)/1.1 var(--mono)}.gas-read span,.gas-read small{font-size:11px}.alert .gas-read{color:#ffd3c8}
+.stage-panel{display:grid;gap:10px}.stage-panel h3{margin:0}.stage-panel small{line-height:1.5;font-family:var(--mono);color:#a4b7bf}.stage-panel strong{font:13px var(--mono)}#stage-buttons{display:flex;flex-wrap:wrap;gap:5px}#stage-buttons [aria-pressed=true]{border-color:#a4ccbb}#stage-buttons .dominant{color:#b5ffdb;background:#24493d}
+.bar{border-block:1px solid #26383e}.bar input{min-width:24px;flex:1;accent-color:#70d7b8}.bar output{font:13px var(--mono);min-width:65px}.bar select,.source-line input{width:auto}.source-line{justify-content:space-between;flex-wrap:wrap}.source-line input{width:72px}.badges label{font-size:12px;color:#b2c4c6}.badges input{width:auto}
+.number{display:inline-flex;vertical-align:baseline;font-variant-numeric:tabular-nums}.digit{display:inline-block;overflow:hidden;height:1em;line-height:1em}.strip{display:block;white-space:pre;line-height:1em}.k-value{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px}.delta{display:block;min-height:1.3em;margin-top:8px;color:#a4b6c0;font:11px var(--mono)}.alarm{border-color:#e3877e}.alarm .number,.alarm .delta{color:#ffa798}.alarm .number{animation:warn-bump .24s ease}@keyframes warn-bump{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}.static-report *{animation:none!important;transition:none!important}
+#race{display:grid;gap:8px;margin-bottom:16px}#race strong{font:600 20px var(--mono);color:#9febce}#race label{font:12px var(--mono)}#race output{float:right}#race progress{display:block;width:100%;height:8px;accent-color:#71dabe}#race label:last-child progress{accent-color:#a499ef}
+@media(max-width:700px){.topbar,.badges,.footer,.footer-actions{flex-wrap:wrap}.instrument-grid{grid-template-columns:minmax(0,1fr);gap:0;padding-bottom:14px}.stage-panel{gap:6px}.bar{gap:7px;padding-inline:10px}.layout,.main,.card,.charts>*{min-width:0}.vessel-wrap canvas{height:210px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.delta.plus,#race .arrived output{color:#93deac}.delta.minus{color:#eaa59b}#stage-buttons button[aria-pressed=true]{outline:1px solid #dce6ed;outline-offset:1px}.number:has(.digit) .strip{font-variant-numeric:tabular-nums}
+.yard{padding:0;overflow:hidden;background:#0d1b24;scroll-margin-top:12px}.yard [hidden]{display:none!important}
+#plantViewport{position:relative;isolation:isolate;height:clamp(300px,40vh,490px);overflow:hidden;background:radial-gradient(ellipse at center,#1c343d,#101e27 70%)}
+#vatScene{width:100%;height:100%;display:block;touch-action:none;cursor:grab}#plantViewport[data-render=preview] #vatScene{background:url(/static/plant/plant-preview.webp) center/contain no-repeat}
+.yard .viewTools,.yard #inspectionTools{position:absolute;inset:10px 14px auto;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#bbcec9;pointer-events:none}.yard #inspectionTools{inset:auto 14px 10px}.yard .viewTools button,.yard #inspectionTools button{pointer-events:auto}
+.yard .plant-line{position:absolute;inset:0;pointer-events:none}.yard .station,.yard .bin-label{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:auto;background:#102830ee;color:#e5fff4;border:1px solid #629b8b;border-radius:5px;padding:5px 9px;font-size:13px}
+#feedNode{left:30%;top:35%}#digNode{left:50%;top:20%}#gasNode{left:75%;top:40%}body:is([data-station=feed],[data-station=dig]) .plant-line{visibility:hidden}.plant-foot{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:8px;padding:7px 16px;color:#c2dbd4;font-size:13px;border-top:1px solid #273b41}.yard .instrument-bar{flex-wrap:wrap}.yard .instrument-bar button{margin-left:auto}.yard #shotLabel{background:#10212ae6;padding:4px 7px}.yard button{cursor:pointer}
+@media(max-width:600px){.yard .station,.yard .bin-label{font-size:11px;padding:4px 6px}.plant-foot{flex-wrap:wrap}}
+.yard .station,.yard .bin-label{width:auto}.yard{scroll-margin-top:80px}
+
+/* Equipment and readings carry the accent; controls use neutral instrument surfaces. */
+body { --bg:#121617; --panel:#1a2021; --panel-2:#202728; --border:#354041; --text:#edf1eb; --muted:#adb9b6; --accent:#92dbc5; }
+.topbar { padding:8px 20px; background:#181d1e; }
+.logo { width:32px; height:32px; border-radius:4px; box-shadow:none; background:#c6dcd3; color:#162622; }
+.badges { align-items:center; }
+.badges .badge { padding:2px 8px; border:0; border-left:1px solid var(--border); border-radius:0; background:transparent; color:var(--muted); }
+.card { border-radius:6px; }
+.sidebar { gap:0; background:var(--panel); border:1px solid var(--border); border-radius:6px; }
+.sidebar .card { border:0; border-bottom:1px solid var(--border); border-radius:0; padding:16px; background:transparent; }
+.sidebar .actions,.sidebar .status { margin:8px 16px; }
+.sidebar h2,.instrument-bar h2 { color:var(--text); font-size:15px; font-weight:600; letter-spacing:0; }
+.feed-columns,.feed-row { display:grid; grid-template-columns:minmax(0,1fr) 64px 24px; gap:8px; align-items:center; }
+.feed-columns { margin-bottom:4px; color:var(--muted); font-size:12px; }
+.feed-columns span:nth-child(2),.feed-row input { text-align:right; }
+.feed-row select { min-width:0; font-family:var(--sans); font-size:13px; }
+.feed-row input,.field output,.k-value,.gas-read { font-variant-numeric:tabular-nums; }
+.btn.primary { color:#10201b; background:#a2ddc9; border-color:transparent; box-shadow:none; }
+.instrument,.yard { background:var(--panel); }
+.instrument-bar,.plant-foot,.source-line,.bar { gap:12px; padding-inline:16px; }
+.instrument-bar span,.source-line,.plant-foot { color:var(--muted); }
+.stage-panel { gap:8px; padding-block:12px; min-width:0; }
+.stage-panel .gas-read { position:static; transform:none; display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px; margin-bottom:4px; padding-bottom:8px; border-bottom:1px solid var(--border); color:var(--text); text-shadow:none; }
+.stage-panel .gas-read small { flex-basis:100%; text-align:left; color:var(--muted); }
+.stage-panel .gas-read strong { color:var(--text); font:600 clamp(20px,2vw,32px)/1.15 var(--mono); }
+.alert .stage-panel .gas-read strong { color:#ffb3a7; }
+:where(button,input,select,a):focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+@media(max-width:700px){ .sidebar { position:static; } .stage-panel { padding:0 8px 12px; } }
