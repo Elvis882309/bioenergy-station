@@ -15,15 +15,31 @@
 </div><button id="applyEnergy" disabled>应用并比较</button><p id="energyDifference" role="status"></p>
 <div class="energyChecks"><label><input id="flowDots" type="checkbox" checked> 显示流动粒子</label><label id="cutLabel"><input id="cutSkin" type="checkbox"> 透视气柜</label></div>
 <details><summary>场景与记录口径</summary><p>本工段回放两级组件模型预先求解的 8 种组合。玉米青贮 11.4、猪粪 6.1 m³/d，水解罐 45 °C。每天保存一次，与单罐台账独立。库存为日末值，放散量为当日合计。</p></details></section>
-<section class="actions"><div id="overview"><small>操作台</small><h2>从一份配方开始</h2><p>点进料罐搭配青贮、猪粪和牛粪。首次完成的方案会留作基线，供下一轮比较。</p><button data-view="feed" class="primary">打开进料罐 →</button></div>
-<div id="feed" hidden><small>进料罐 / 待运行台账</small><h2>配制进料</h2><p>点原料或拖到投料区，每次增加 1 m³/d。</p><div id="cards"></div><div id="drop"><div id="feedRows"></div><div id="mix"></div><p id="total"></p></div>
+<section class="actions"><div id="overview"><small>操作台</small><h2>从一份配方开始</h2><p>三个料位可分别选用不同底物。首次完成的方案会留作基线，供下一轮比较。</p><button data-view="feed" class="primary">打开进料罐 →</button></div>
+<div id="feed" hidden><small>进料罐 / 待运行台账</small><h2>配制进料</h2><p id="catalogHint">更换底物保留该料位的流量；未使用的料位可设为 0。</p><div id="cards"></div><div id="drop"><div id="feedRows"></div><div id="mix"></div><p id="total"></p></div>
 <details><summary>从 CSV 导入台账</summary><p>按实际体积流量导入，单位 m³/d。导入后可核对并修改。</p><a download href="recipe.csv">下载模板</a><input id="ledger" type="file" accept=".csv,text/csv" aria-label="导入进料台账"></details>
 <label>消化温度（°C）<input id="temp" type="number" min="15" max="65" step=".1" value="42"></label><label>仿真窗口<select id="days"><option value="30">30 天</option><option value="150">150 天</option><option value="300">300 天</option></select></label>
+<label><span>拟真模式 · 进料微扰</span><input type="checkbox" id="realism" disabled></label>
+<small id="realismHint">正在检查实时求解服务…</small>
+<div id="seedRow" hidden><label>随机种子<input id="realismSeed" aria-label="随机种子" inputmode="numeric" maxlength="10"></label><button type="button" id="reroll">换一组扰动</button></div>
 <details class="uiAdvanced"><summary>其他运行条件<span id="condSummary" class="uiSummary"></span></summary><label>液相容积（m³）<input id="liq" type="number" min="2" max="20000" value="1050"></label><label>气相容积（m³）<input id="head" type="number" min="2" max="5000" value="150"></label><label>kLa（d⁻¹）<input id="kla" type="number" min="1" max="2000" value="200"></label><label><input id="eventCase" type="checkbox"> 第 10 天降温 5 °C</label></details><button class="primary" id="run">锁定配方并运行 →</button></div>
 <div id="dig" hidden><small>消化罐 / 剖面</small><h2>观察反应过程</h2><div id="shots"></div><div id="phaseBox" hidden><label>反应阶段<select id="phase"><option>水解</option><option>酸化</option><option>产乙酸</option><option>产甲烷</option></select></label></div><p id="observation"></p><p class="note">镜头、颗粒和流线是过程示意。状态读数取自选中时刻的模型轨迹。</p><button data-view="gas">前往产气计量 →</button></div>
 <div id="gasPanel" hidden><small>计量设备 / 结果</small><h2>方案对比</h2><div id="comparison"></div><button data-view="feed">调整下一份配方 →</button></div></section>
 <section class="readings" data-ui-empty="true"><small id="record">本轮读数 · 等待首次运行</small><p class="uiEmpty">完成或载入方案后显示读数。</p><div class="meter"><b id="gas">—</b> m³/d</div><p>当前产气速率</p><div class="pair"><div>甲烷占比<strong id="methane">—</strong></div><div>液相 pH<strong id="ph">—</strong></div></div><p id="delta"></p></section>
 <p id="status" role="status"></p></aside></div>
+<button id="masterNotice" aria-expanded="false" aria-controls="masterDesk" aria-haspopup="dialog">试验站站长</button>
+<section id="masterDesk" role="dialog" aria-labelledby="masterTitle" hidden>
+<div class="masterBar"><h2 id="masterTitle">试验站站长</h2><button id="masterClose" aria-label="收起站长浮窗" title="收起">−</button></div>
+<div class="masterBody"><small>运行值班 · 模型仿真</small><br>
+<strong id="masterLevel" role="status">等候首次运行</strong><p id="masterEvidence">尚无可供判断的轨迹。</p>
+<p id="masterPrompt">值班提问：要先用固定配方建立一份对照吗？</p>
+<button id="masterJump" hidden>定位最近预警</button>
+<details><summary>判读口径与扰动记录</summary><p>本场景以 pH &lt; 6.5 为低 pH 提醒；约一日前的记录至当前，若 pH 下降至少 0.15 且四酸合计上升至少 0.05 kg COD/m³，则提醒关注趋势。参考间隔超过 1.5 天不作趋势判断。四酸合计不等于 VFA/TAC。阈值为演示设定，不作现场诊断。</p><p id="masterEvents">暂无事件。</p></details></div>
+<div class="masterBody"><button id="masterTrial" disabled>核对当前时刻的补救方案</button><div id="trialResult" role="status"></div></div>
+<div class="masterBody"><small id="masterMode">本机规则问答</small><div id="masterQuick"><button>有什么风险？</button><button>这次扰动是什么？</button><button>下一轮怎么调？</button></div>
+<div id="masterChat" role="log" aria-label="站长问答"></div>
+<form id="masterForm"><input id="masterQuestion" maxlength="600" required aria-label="向站长提问" placeholder="问配方、趋势或下一轮实验"><button>提问</button></form></div></section>
 </main><div id="moduleViews"><section class="modulePane" id="panel-trace" role="tabpanel" aria-labelledby="tab-trace" hidden></section><section class="modulePane" id="panel-engine" role="tabpanel" aria-labelledby="tab-engine" hidden></section><section class="modulePane" id="panel-system" role="tabpanel" aria-labelledby="tab-system" hidden></section><section class="modulePane" id="panel-calibration" role="tabpanel" aria-labelledby="tab-calibration" hidden></section><section class="modulePane" id="panel-estimation" role="tabpanel" aria-labelledby="tab-estimation" hidden></section><section class="modulePane" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard" hidden></section></div>
 <dialog id="coreDialog"><div class="bar"><b>本轮计算核心</b><span id="coreMeta"></span><button id="back">返回试验站</button></div><iframe title="本轮环形状态向量"></iframe></dialog>
+<link rel="stylesheet" href="stationmaster.css"><script src="acid-watch.js"></script><script defer src="stationmaster.js"></script>
 <script src="/static/plant/three.min.js"></script><script src="/static/plant/gsap.min.js"></script><script src="/static/plant/reactor05.js"></script><script src="energy-deck.js"></script><script src="plant.js"></script><script src="sound.js"></script><script src="station.js"></script><script src="energy.js"></script><script src="workbench.js"></script></body></html>

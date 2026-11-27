@@ -20,6 +20,10 @@ import atexit
 import json
 import queue
 import logging
+import http.client
+import os
+import uuid
+from urllib.parse import urlsplit
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -331,7 +335,8 @@ def run_simulation(req: SimRequest, report=None, race_report=None) -> dict:
             "ts": _clean(ts),
             "hrt": _clean(hrt),
         },
-        "summary": {k: round(v, 5) if isinstance(v, float) else v for k, v in summary.items()},
+        "summary": {k: (round(v, 5) if np.isfinite(v) else None) if isinstance(v, float) else v
+                    for k, v in summary.items()},
     }
 
 
@@ -358,6 +363,8 @@ def meta() -> dict:
     return {
         "version": pyadm1.__version__,
         "model": "ADM1da · 41 状态",
+        "stationmaster": {"feed_pulses": True, "recovery_plans": True, "local_model": bool(os.getenv("STATIONMASTER_OLLAMA_MODEL")),
+                          "cloud_model": all(os.getenv("STATIONMASTER_"+k) for k in ("BASE_URL","MODEL","API_KEY"))},
         "substrates": substrate_ids(),
         "substrate_labels": substrate_labels(),
         "julia_installed": importlib.util.find_spec("juliacall") is not None,
@@ -378,12 +385,16 @@ def meta() -> dict:
     }
 
 
+_branch_records = {}  # Only accessed on the serial solver worker.
+
+
 def _trace_one(req: TraceRequest) -> dict:
     """Body of /api/trace, kept separate so it can run on the solver thread."""
     plant, _ids, _flows = build_plant(req)
     perturbation = None
     if req.temp_step_day is not None:
         perturbation = (float(req.temp_step_day), float(req.temp_step_delta_c))
+    snapshot = []
     data = steptrace.record(
         plant,
         "main_digester",
@@ -392,7 +403,15 @@ def _trace_one(req: TraceRequest) -> dict:
         backend=req.backend,
         max_points=req.max_points,
         temp_step=perturbation,
+        realism_seed=req.realism_seed,
+        capture=(lambda y,t: snapshot.extend((y,t))) if req.backend=="scipy" else None,
     )
+    if snapshot:
+        key=uuid.uuid4().hex
+        if len(_branch_records)>=4:
+            del _branch_records[next(iter(_branch_records))]
+        _branch_records[key]=(req,*snapshot)
+        data["branch_id"]=key
     return {"ok": True, **data}
 
 
@@ -416,6 +435,7 @@ def _traces_all(req: TracesRequest) -> dict:
                 label=label,
                 max_points=req.max_points,
                 temp_step=perturbation,
+                realism_seed=req.realism_seed,
             )
         )
 
@@ -489,6 +509,7 @@ class TraceRequest(SimRequest):
     """A simulation plus how many steps the trace may return."""
 
     max_points: int = Field(default=1500, ge=100, le=6000)
+    realism_seed: int | None = Field(default=None, ge=0, le=2147483647)
     temp_step_day: float | None = Field(default=None, ge=0.0, le=1000.0)
     temp_step_delta_c: float = Field(default=-5.0, ge=-20.0, le=20.0)
 
@@ -504,6 +525,99 @@ def trace_steps(req: TraceRequest) -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"{type(exc).__name__}: {exc}") from exc
+
+
+class StationQuestion(BaseModel):
+    question: str = Field(min_length=1, max_length=600)
+    context: str = Field(max_length=6000)
+
+
+class TrialRequest(BaseModel):
+    run_id: str = Field(max_length=32)
+    index: int = Field(ge=0)
+
+
+def _trial(req):
+    if req.run_id not in _branch_records:
+        raise HTTPException(410,"记录已过期，请重新运行本方案")
+    settings, states, times = _branch_records[req.run_id]
+    if req.index>=len(times):
+        raise HTTPException(422,"游标超出记录范围")
+    start=float(times[req.index])
+    trials=[]
+    def metrics(adm,y):
+        h=adm._calc_ph(*(float(y[i]) for i in (10,36,35,34,33,32,31,29,30)),adm._inhib_params["K_w"])
+        values=(float(-np.log10(h)),float(sum(y[3:7])),float(adm.calc_gas(*map(float,y[37:41]))[1]))
+        if not all(np.isfinite(values)):
+            raise ValueError("分支指标无效，无法判定补救效果")
+        return dict(zip(("ph","acids","ch4"),values))
+    for factor in (1.0,0.8,0.6,0.4):
+        plant,_,flows=build_plant(settings)
+        adm=plant.components["main_digester"].adm1
+        if settings.temp_step_day is not None and start>round(settings.temp_step_day/settings.dt)*settings.dt:
+            adm.T_ad+=settings.temp_step_delta_c
+        y=states[req.index].copy()
+        adm.create_influent([q*factor for q in flows],0)
+        # Split at 48 h so the last-day trend starts at an actual solver state.
+        _,early,_=steptrace._step_scipy(adm,y,start,start+2,1e-6,1e-8,0.1)
+        _,late,_=steptrace._step_scipy(adm,early[-1],start+2,start+3,1e-6,1e-8,0.1)
+        last_day=[metrics(adm,v) for v in [early[-1],*late]]
+        first,end=last_day[0],last_day[-1]
+        minimum=min(p["ph"] for p in last_day)
+        trials.append(dict(factor=factor,**end,min_last_ph=minimum,
+            meets=minimum>=6.5 and end["acids"]<=first["acids"] and end["ph"]>=first["ph"],
+            feed=[dict(substrate_id=f.substrate_id,q=f.q*factor) for f in settings.feed],
+            deferred=sum(flows)*(1-factor)*3))
+    chosen=next((i for i,p in enumerate(trials) if p["meets"]),None)
+    return dict(trials=trials,chosen=chosen,control=trials[0],reduced=trials[1],deferred=trials[1]["deferred"])
+
+
+@app.post("/api/stationmaster/trial")
+def station_trial(req: TrialRequest):
+    return _serial(_trial,req)
+
+
+@app.post("/api/stationmaster")
+def stationmaster(req: StationQuestion) -> dict:
+    model = os.getenv("STATIONMASTER_OLLAMA_MODEL")
+    base,cloud_model,key=(os.getenv("STATIONMASTER_"+k) for k in ("BASE_URL","MODEL","API_KEY"))
+    cloud=bool(base and cloud_model and key)
+    if not cloud and not model:
+        raise HTTPException(503, "未配置站长语言模型")
+    messages = [
+        {"role": "system", "content": "你是厌氧消化试验站站长。用中文简明回答。所有实验数据都是模型仿真，"
+         "仅引用所给记录。保留规则预警结论，区分趋势与因果、草稿与结果、推测与事实。"
+         "补救措施只解释资料中 ADM1 已比较的分支、料量和时间窗口，不自拟剂量或保证恢复。"
+         "未找到达标方案时明确说出。没有证据就说明未知，不声称已操作设备。"},
+        {"role": "user", "content": "选中时刻的实验资料和会话：\n" + req.context + "\n问题：" + req.question},
+    ]
+    headers={"Content-Type":"application/json"}
+    if cloud:
+        url=urlsplit(base)
+        if url.scheme!="https" or not url.hostname or url.username or url.password or url.query or url.fragment:
+            raise HTTPException(503,"站长服务地址配置无效")
+        conn=http.client.HTTPSConnection(url.hostname,url.port or 443,timeout=45)
+        path=url.path.rstrip("/")+"/chat/completions"
+        headers["Authorization"]="Bearer "+key
+        payload={"model":cloud_model,"messages":messages,"stream":False}
+    else:
+        conn=http.client.HTTPConnection("127.0.0.1",11434,timeout=30)
+        path="/api/chat"
+        payload={"model":model,"stream":False,"messages":messages,"options":{"num_predict":400}}
+    try:
+        conn.request("POST",path,json.dumps(payload),headers)
+        reply = conn.getresponse()
+        if reply.status != 200:
+            raise ValueError("model unavailable")
+        body=json.loads(reply.read(262144))
+        answer=(body["choices"][0] if cloud else body)["message"]["content"]
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("empty answer")
+        return {"answer": answer}
+    except (OSError, http.client.HTTPException, ValueError, IndexError, KeyError, TypeError) as exc:
+        raise HTTPException(503, "语言模型未就绪") from exc
+    finally:
+        conn.close()
 
 
 @app.get("/trace")

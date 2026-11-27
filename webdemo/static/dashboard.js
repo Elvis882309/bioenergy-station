@@ -97,6 +97,7 @@ const dashboard = (() => {
       const delta=c.querySelector(".delta"),b=previous?.summary;
       delta.className="delta"+(final&&b&&i<2?(v>b[key]?" plus":v<b[key]?" minus":""):"");
       delta.textContent=(alarm?"超限 · ":"")+(final&&b?"较上次 "+difference(v,b[key],n)+(i===5?" / "+difference(summary.final_tac,b.final_tac,n):i===1?" 个百分点":""):i===5?"比值 "+fmt(ratio,2):final?"首次运行":"截至当前采样点");
+      if(i===5 && summary.final_tac==null)delta.textContent="模型碱度不可用，无法计算比值";
     });
     setGas(s.q_gas[index],s.ph[index],data.stage_rates[index]);
     const prefix=Object.fromEntries(Object.entries(s).map(([k,v])=>[k,v.slice(0,index+1)]));drawCharts(prefix);

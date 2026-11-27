@@ -2,7 +2,7 @@
 
 中国农业大学烟台研究院 · AgriHackathon 主赛道作品。用同一套厌氧消化模型比较农业废弃物进料方案，查看每天的产气、甲烷占比和 pH，以及整段时间累计多产或少产了多少气。
 
-[打开试验站](https://elvis882309.github.io/bioenergy-station/) · 固定版本：[v2.0.0-agri](https://github.com/Elvis882309/bioenergy-station/tree/v2.0.0-agri)
+[公开演示](https://elvis882309.github.io/bioenergy-station/) · [初赛固定版本 v2.0.0-agri](https://github.com/Elvis882309/bioenergy-station/tree/v2.0.0-agri)
 
 ## 评委体验路径
 
@@ -20,9 +20,9 @@
 
 本次界面改版（2026-11）只涉及控制台外壳与 DOM 微动效；模型、数据、记录和公开版语义未变：公开版仍读取预计算记录，不在浏览器里现场求解。
 
-## 从源码运行自定义工况
+## 从源码运行站长版
 
-以下步骤运行的是当前 main（固定版本 v2.0.0-agri）的源码，打开后即为 2026-11 新版控制台界面。8848 是本机后端模式，与公网演示的预计算记录模式不同。
+当前 `main` 是站长版。沙盘支持从 13 种底物中选配、从 CSV 导入进料台账，并用 ADM1 预检进料方案。回放时可查看模拟酸化预警及发生时刻，并从同一罐内状态推演四档进料量下的 72 小时结果。拟真模式通过随机种子复算进料扰动。
 
 建议使用 Python 3.12，在仓库根目录的虚拟环境中执行：
 
@@ -31,10 +31,10 @@ python -m pip install . fastapi uvicorn
 python webdemo/app.py --port 8848
 ```
 
-打开 http://127.0.0.1:8848/static/station/index.html 。单罐使用 SciPy，Julia 通道还需要 juliacall 及其 Julia 项目依赖，详见 _setup_julia.py。公开网页无需安装这些依赖。
+启动后[打开本机沙盘](http://127.0.0.1:8848/static/station/index.html)。单罐使用 SciPy，Julia 通道还需要 juliacall 及其 Julia 项目依赖，详见 `_setup_julia.py`。演示步骤与预警口径见[站长使用说明](webdemo/STATIONMASTER.md)。
 
-## 复核一次结果
+## 复核公开演示的结果
 
-docs/records/index.json 保存每条请求的 URL、输入快照、压缩文件名和响应原文 SHA-256。用 gzip 解压对应文件即可查看数值。时间游标上的累计量由相邻记录点梯形积分计算。自行启动服务后，运行 python tools/collect.py 导出新记录，然后运行 python tools/build_pages.py 重新构建公开版。
+`docs/records/index.json` 保存每条请求的 URL、输入快照、压缩文件名和响应原文 SHA-256。用 gzip 解压对应文件即可查看数值。时间游标上的累计量由相邻记录点梯形积分计算。初赛公开版的记录导出与静态构建脚本见 `v2.0.0-agri`。
 
 模型、底物库及配套科研模块基于 [PyADM1ODE](https://github.com/dgaida/PyADM1ODE)、[PyADM1ODE_calibration](https://github.com/dgaida/PyADM1ODE_calibration) 和 [PyADM1ODE_estimate](https://github.com/dgaida/PyADM1ODE_estimate)。上游许可见 LICENSE。三维界面使用 Three.js，轨迹界面注明了 [HALOFLUX](https://github.com/Ryder191/haloflux) 的非商业视觉参考。参赛工作围绕进料台账、设备交互、求解轨迹观察和方案比较展开。

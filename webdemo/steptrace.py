@@ -15,6 +15,7 @@ checked, not assumed: ``test_trace_reproduces_the_digester`` in
 from __future__ import annotations
 
 import time
+import random
 from typing import Any
 
 import numpy as np
@@ -70,6 +71,19 @@ def _step_julia(adm, y0, t0, t1, rtol, atol, max_step):
     return ts, ys, hs
 
 
+def feed_pulses(seed, steps):
+    """At most three one-interval pulses, separated by undisturbed intervals."""
+    if seed is None:
+        return {}
+    rng = random.Random(seed)
+    pulses = {}
+    for segment in range(3):
+        lo, hi = segment * steps // 3 + 1, (segment + 1) * steps // 3 - 2
+        if lo <= hi:
+            pulses[rng.randint(lo, hi)] = rng.choice((-1, 1)) * rng.randint(2, 5)
+    return pulses
+
+
 def record(
     plant,
     digester_id: str = "main_digester",
@@ -84,6 +98,8 @@ def record(
     max_step_frac: float = 0.1,
     max_points: int = 1500,
     temp_step: tuple[float, float] | None = None,
+    realism_seed: int | None = None,
+    capture=None,
 ) -> dict[str, Any]:
     """Run the digester step by step and return the recorded trace.
 
@@ -121,6 +137,7 @@ def record(
 
     y = np.asarray(digester.adm1_state, dtype=float).copy()
     n_outer = max(1, round(days / dt))
+    pulses = feed_pulses(realism_seed, n_outer)
 
     base_t_ad = float(adm.T_ad)
     step_day = None
@@ -178,7 +195,13 @@ def record(
             adm.T_ad = base_t_ad + step_delta
             events.append({"t": round(t0, 4), "kind": "temp_step", "delta_c": step_delta})
 
-        adm.create_influent(digester.Q_substrates, day)
+        flows = digester.Q_substrates
+        if day in pulses:
+            change = pulses[day]
+            flows = [q * (1 + change / 100) for q in flows]
+            events.append({"t": t0, "end": t1, "kind": "feed_pulse", "percent": change,
+                           "total_m3_d": sum(flows)})
+        adm.create_influent(flows, day)
         ts, ys, hs = step_fn(adm, y, t0, t1, rtol, atol, max_step)
         for t_i, y_i, h_i in zip(ts, ys, hs):
             all_t.append(t_i)
@@ -195,6 +218,8 @@ def record(
     keep = list(range(0, len(all_t), stride))
     if keep[-1] != len(all_t) - 1:
         keep.append(len(all_t) - 1)
+    if capture is not None:
+        capture(np.array([all_y[i] for i in keep]), np.array([all_t[i] for i in keep]))
 
     y_flat: list[float] = []
     du_flat: list[float] = []
@@ -222,6 +247,7 @@ def record(
         "du": du_flat,
         "state_size": 41,
         "events": events,
+        **({"realism_seed": realism_seed} if realism_seed is not None else {}),
         "final": {
             "ph": round(all_ph[-1], 4),
             "gas": round(all_gas[-1], 2),

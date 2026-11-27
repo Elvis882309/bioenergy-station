@@ -271,6 +271,7 @@
     return {sample,fill,fragments,label,angle:startAngle+sectorWidth/2};
   });
   let recipe=[1/3,1/3,1/3];
+  viewport.addEventListener("feed-labels",event=>bins.forEach(({label},i)=>label.textContent=event.detail[i]));
   viewport.addEventListener("feed-mixture",event=>{
     recipe=event.detail;
     bins.forEach(({fill,fragments},index)=>{
